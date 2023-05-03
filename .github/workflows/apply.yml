@@ -1,12 +1,6 @@
-name: Terraform Check
+name: Terraform Apply
 
-on:
-  pull_request:
-    branches: [ "*" ]
-
-permissions:
-      id-token: write
-      contents: read
+on: workflow_dispatch
 
 jobs:
   jsp:
@@ -27,17 +21,16 @@ jobs:
       - name: Init terraform
         run: terraform init
 
-      - name: Validate code
-        run: terraform validate
-        
-      - name: Build plan
-        run: terraform plan
+      - name: Download plan
+        uses: actions/download-artifact@v3
+        with:
+          name: terraform-plan
 
       - name: Apply
-        run: terraform apply -auto-approve
+        run: terraform apply "plan" -auto-approve
         env:
           TF_VAR_ssh_key: ${{ secrets.AZURE_SSH_KEY }}
-
+      
       - name: Get ip
         run: terraform refresh
       
